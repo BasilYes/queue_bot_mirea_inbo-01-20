@@ -107,6 +107,20 @@ def send_message(user_id, message):
     # vk_session.method('messages.send', {'user_id': user_id, 'message': message, 'random_id': 0})
 
 
+def get_loaded():
+    global users
+    global current_queue
+    out = ""
+    counter = 1
+    for i in loaded_queue:
+        try:
+            out += str(counter) + ". " + users[i] + "\n"
+        except:
+            out += str(counter) + ". " + "Чел с vk id: " + str(i) + " сделавший невозможное\n"
+        counter += 1
+    return out
+
+
 def get_queue():
     global users
     global current_queue
@@ -118,6 +132,8 @@ def get_queue():
         except:
             out += str(counter) + ". " + "Чел с vk id: " + str(i) + " сделавший невозможное\n"
         counter += 1
+    for i in addition_queue.keys():
+        out += users[i] + " за " + users[addition_queue[i]] + "\n"
     return out
 
 
@@ -190,19 +206,28 @@ def shuffle_queue():
     for i in current_queue:
         if i not in new_queue:
             new_queue.append(i)
-    for i in addition_queue.keys()[::-1]:
+    for i in list(addition_queue.keys())[::-1]:
         new_queue.insert(new_queue.index(addition_queue[i]) + 1, i)
     loaded_queue = []
     current_queue = new_queue
     addition_queue = {}
-    message_distribution("Очередь перемешана, текущая очередь:\n" +
-                         get_queue())
+
+    message = "Очередь перемешана, текущая очередь:\n" + get_queue()
+    keyboard = keyboards.in_queue().get_keyboard()
+    global Lsvk
+    message_distribution(message)
+    for i in current_queue:
+        Lsvk.messages.send(
+            user_id=i,
+            random_id=get_random_id(),
+            keyboard=keyboard,
+            message="Ты в очереди, бог рандома выбрал тебе место."
+        )
 
     if len(current_queue) > 1:
-        send_message(current_queue[1], "Рандом мой дом, ты первый, вперед отвечать! как закончишь жми на готово")
+        send_message(current_queue[1], "Второе место по везению, ты следующий, готовься")
     if len(current_queue) > 0:
-        send_message_key(current_queue[0],
-                         "Второе место по везению, ты следующий, готовься",
+        send_message_key(current_queue[0], "Рандом мой дом, ты первый, вперед отвечать! как закончишь жми на готово",
                          keyboards.current_player().get_keyboard())
 
 
@@ -265,15 +290,25 @@ def update_stage():
             if par > 0 and time_table[day][par - 1] != "0":
                 save_current_queue()
             par = l_par
-            if time_table[day][par - 1] != "0":
-                load_queue()
-                message_distribution_key("Новая очередь по предмету \"" +
-                                         time_table[day][par - 1] +
-                                         "\" успей записатся до начала пары, если ты сделал конечно,"
-                                         " а если не сделал, не будь 🤡, доделаешь запишешься."
-                                         "Если хочешь записаться за другом напиши \"я за N\" N-номер"
-                                         " твоего друга в очереди",
-                                         keyboards.par().get_keyboard())
+            if 1 < par < 7 and time_table[day][par - 1] == time_table[day][par - 2]:
+                message_distribution("Между первой и второй, перерывчик небольшой. А для кого-то опять " +
+                                     time_table[day][par - 2])
+                is_break = False
+            elif 0 < par < 7:
+                if time_table[day][par - 1] != "0":
+                    load_queue()
+                    message_distribution_key("Новая очередь по предмету \"" +
+                                             time_table[day][par - 1] +
+                                             "\" успей записатся до начала пары, если ты сделал конечно,"
+                                             " а если не сделал, не будь 🤡, доделаешь запишешься."
+                                             "Если хочешь записаться за другом напиши \"я за N\" N-номер"
+                                             " твоего друга в очеред. Список с прошлой пары:\n" + get_loaded(),
+                                             keyboards.par().get_keyboard())
+                    for i in loaded_queue:
+                        send_message_key("Ты остался в списке с прошлой пары, если ты действительно не успел сдать,"
+                                         " запишись на эту тоже, твоя запись будет в приоритете, а если успел сдать"
+                                         " или сдал после окончания пары пожалуйста нажми кнопку \"Я Хорош\"",
+                                         keyboards.loaded().get_keyboard())
         elif is_break != l_is_break:
             if time_table[day][par - 1] != "0":
                 shuffle_queue()
@@ -302,6 +337,7 @@ while True:
     print("par: " + str(par))
     print("current_queue: " + str(current_queue))
     print("loaded_queue: " + str(loaded_queue))
+    print("addition_queue: " + str(addition_queue))
     print("is_break: " + str(is_break))
     print("stage: " + str(stage))
 
@@ -330,7 +366,7 @@ while True:
                 elif event.user_id not in users:
                     send_message(event.user_id, "Сначала напиши свое ФИО после команды фио."
                                                 " Пример правильной команды: \"фио Реуков Василий\"")
-                elif 0 < par < 6 and time_table[day][par - 1] != "0":
+                elif 0 < par <= 6 and time_table[day][par - 1] != "0":
                     # if not is_break:
                     print(text)
                     if text == "очередь":
@@ -342,7 +378,11 @@ while True:
                         print(event.user_id)
                         if event.user_id not in current_queue and event.user_id not in addition_queue:
                             current_queue.append(event.user_id)
-                            send_message_key(event.user_id, "Ты записан", keyboards.in_queue().get_keyboard())
+                            if is_break:
+                                send_message_key(event.user_id, "Ты записан, хорошего тебе перерыва",
+                                                 keyboards.in_queue_break().get_keyboard())
+                            else:
+                                send_message_key(event.user_id, "Ты записан", keyboards.in_queue().get_keyboard())
                             if not is_break:
                                 if current_queue[0] == event.user_id:
                                     send_message_key(current_queue[0],
@@ -351,38 +391,58 @@ while True:
                                                      keyboards.current_player().get_keyboard())
                                 elif len(current_queue) > 1 and current_queue[1] == event.user_id:
                                     send_message(current_queue[1], "Только зашел и сразу второй, готовься")
+                        elif event.user_id in addition_queue:
+                            send_message(event.user_id, "Ты хвостиком за " + users[addition_queue[event.user_id]] +
+                                         ". Не волнуйся, как начнется пара ты появишься в очереди.")
                         else:
                             send_message(event.user_id, "Прекращай, ты уже в очереди")
                     elif text == "выписаться":
                         if event.user_id in current_queue:
-                            if len(current_queue) > 2 and current_queue[1] == event.user_id:
-                                send_message(current_queue[2], "Тут перед тобой скипают, ты следующий теперь, готовься")
-                            current_queue.remove(event.user_id)
-                            send_message_key(event.user_id, "Ты удален из очереди.", keyboards.par().get_keyboard())
+                            if not is_break:
+                                if len(current_queue) > 2 and current_queue[1] == event.user_id:
+                                    send_message(current_queue[2], "Тут перед тобой скипают,"
+                                                                   " ты следующий теперь, готовься")
+                                current_queue.remove(event.user_id)
+                                send_message_key(event.user_id, "Ты удален из очереди.", keyboards.par().get_keyboard())
+                            else:
+                                send_message_key(event.user_id,
+                                                 "Дружище, очередь еще не перемешана, подожди.",
+                                                 keyboards.par().get_keyboard())
                         else:
                             send_message(event.user_id, "Ты не в очереди или записался за кем-то,"
                                                         " в таком случае выписаться можно только после начала пары")
                     if is_break:
                         if text[:4] == "я за":
-                            if event.user_id in current_queue:
-                                current_queue.remove(event.user_id)
-                            try:
-                                id = int(text[5:].split(" ")[0]) - 1
-                                if len(current_queue) > id >= 0:
-                                    if current_queue[id] not in loaded_queue:
-                                        addition_queue[event.user_id] = current_queue[id]
-                                    else:
-                                        send_message(event.user_id, "Твой друг в приоритетной очереди"
-                                                                    ", он не успел ответить на прошлой паре,"
-                                                                    " ты не можешь записатся с ним. Запишись с помощью команыды \"записаться\","
-                                                                    " если вы были друг за дружкой на прошлой паре (на которой не успели ответить)"
-                                                                    " вас поставит так-же на этой")
-                            except:
-                                send_message(event.user_id, "Не пытайся сломать бота,"
-                                                            " он может случайно забыть тебя записать.")
+                            if event.user_id not in current_queue:
+                                try:
+                                    id = int(text[5:].split(" ")[0]) - 1
+                                    if len(current_queue) > id >= 0:
+                                        if current_queue[id] not in loaded_queue:
+                                            addition_queue[event.user_id] = current_queue[id]
+                                            send_message(event.user_id, "Ты записался за " + users[current_queue[id]] +
+                                                         ", теперь ты его хвостик, не отвертишся.")
+                                        else:
+                                            send_message(event.user_id, "Твой друг в приоритетной очереди"
+                                                                        ", он не успел ответить на прошлой паре,"
+                                                                        " ты не можешь записатся с ним."
+                                                                        " Запишись с помощью команды \"записаться\","
+                                                                        " если вы были друг за дружкой на прошлой паре"
+                                                                        " (на которой не успели ответить)"
+                                                                        " вас поставит так-же на этой")
+                                except:
+                                    send_message(event.user_id, "Не пытайся сломать бота,"
+                                                                " он может случайно забыть тебя записать.")
+                            else:
+                                send_message(event.user_id, "Ты уже в очереди, хочешь за кем-то теперь?"
+                                                            " А все надо было сначала думать потом делать.")
                     else:
                         if text == "готово":
                             if len(current_queue) > 0 and event.user_id == current_queue[0]:
                                 next()
+                        elif text[:7] == "я хорош":
+                            send_message_key(event.user_id, "Ты действительно хорош!", keyboards.par().get_keyboard())
+                        elif text[:4] == "я за":
+                            send_message(event.user_id, "Дружок, пара уже началась,"
+                                                        " только в конец очереди, только хардкор")
                 else:
                     send_message(event.user_id, "Не душни, я отдыхаю")
