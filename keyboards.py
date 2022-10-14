@@ -11,9 +11,10 @@ def current_player():#Игровое меню
     keyboard.add_button('Готово', color=VkKeyboardColor.PRIMARY)
     return keyboard
 
-    # keyboard = VkKeyboard(one_time=False)
-    # keyboard.add_button('Очередь', color=VkKeyboardColor.POSITIVE)
-    # keyboard.add_button('Записаться', color=VkKeyboardColor.POSITIVE)
-    # keyboard.add_line()
-    # keyboard.add_button('Готово', color=VkKeyboardColor.PRIMARY)
-    # return keyboard
+def in_queue():
+    keyboard = VkKeyboard(one_time=False)
+    keyboard.add_button('Очередь', color=VkKeyboardColor.POSITIVE)
+    keyboard.add_button('Выписаться', color=VkKeyboardColor.POSITIVE)
+    #keyboard.add_line()
+    #keyboard.add_button('Готово', color=VkKeyboardColor.PRIMARY)
+    return keyboard

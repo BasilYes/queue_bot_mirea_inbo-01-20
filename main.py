@@ -1,13 +1,11 @@
-import random, vk_api, vk
-from vk_api.keyboard import VkKeyboard, VkKeyboardColor
-from vk_api.utils import get_random_id
+import os.path
+import random
 from datetime import datetime
 
-import random
-import info
-import os
-import os.path
+import vk_api
+from vk_api.utils import get_random_id
 
+import info
 import keyboards
 
 try:
@@ -59,7 +57,7 @@ def next():
         send_message(current_queue[1], "Ты следующий, готовься")
     if len(current_queue) > 0:
         send_message_key(current_queue[0],
-                         "Твое время пришло, как закончишь нажми готов",
+                         "Твое время пришло, как закончишь нажми готово",
                          keyboards.current_player().get_keyboard())
 
 
@@ -86,7 +84,6 @@ def message_distribution_key(message, keyboard):
         )
         # vk_session.method('messages.send', {'user_id': i, 'message': message, 'random_id': 0})
     print("Message distribution: " + message)
-
 
 
 def send_message_key(user_id, message, keyboard):
@@ -119,7 +116,7 @@ def get_queue():
         try:
             out += str(counter) + ". " + users[i] + "\n"
         except:
-            out += str(counter) + ". " + "Неуказаный пользователь с идентификатором" + str(i) + "\n"
+            out += str(counter) + ". " + "Чел с vk id: " + str(i) + " сделавший невозможное\n"
         counter += 1
     return out
 
@@ -140,7 +137,7 @@ def load_users():
     out = file.readlines()
     for i in out:
         n = i.split(" ")
-        users[int(n[0])] = i[len(n[0])+1:-1]
+        users[int(n[0])] = i[len(n[0]) + 1:-1]
     file.close()
 
 
@@ -194,7 +191,7 @@ def shuffle_queue():
         if i not in new_queue:
             new_queue.append(i)
     for i in addition_queue.keys()[::-1]:
-        new_queue.insert(new_queue.index(addition_queue[i])+1, i)
+        new_queue.insert(new_queue.index(addition_queue[i]) + 1, i)
     loaded_queue = []
     current_queue = new_queue
     addition_queue = {}
@@ -202,10 +199,10 @@ def shuffle_queue():
                          get_queue())
 
     if len(current_queue) > 1:
-        send_message(current_queue[1], "Ты следующий, готовься")
+        send_message(current_queue[1], "Рандом мой дом, ты первый, вперед отвечать! как закончишь жми на готово")
     if len(current_queue) > 0:
         send_message_key(current_queue[0],
-                         "Твое время пришло, как закончишь нажми готов",
+                         "Второе место по везению, ты следующий, готовься",
                          keyboards.current_player().get_keyboard())
 
 
@@ -216,7 +213,7 @@ def update_stage():
     delta = datetime.now() - start_day
     day = delta.days % 14
     time = delta.seconds // 60
-    print("time: "+ str(time/60))
+    print("time: " + str(time / 60))
     l_par = 0
     l_is_break = 0
     if time < 8 * 60 + 30:
@@ -264,7 +261,7 @@ def update_stage():
 
     if (l_par != 0 and par != 7) or not is_break:
         if par != l_par:
-            print(str(day)+", "+str(par)+", "+str(l_par))
+            print(str(day) + ", " + str(par) + ", " + str(l_par))
             if par > 0 and time_table[day][par - 1] != "0":
                 save_current_queue()
             par = l_par
@@ -322,9 +319,6 @@ while True:
                     if len(event.text[4:].split(" ")) < 2:
                         send_message(event.user_id, "Дружище, ты забыл написать фамилию И имя после команды фио."
                                                     " Пример правильной команды: \"фио Клоунов Егор\"")
-                    elif event.text[4:] == "":
-                        send_message(event.user_id, "Дружище, ты забыл написать свое ФИО после команды фио."
-                                                    " Пример правильной команды: \"фио Клоунов Егор\"")
                     else:
                         add_user(event.user_id, event.text[4:])
                         if 0 < par < 6 and time_table[day][par - 1] != "0":
@@ -348,16 +342,26 @@ while True:
                         print(event.user_id)
                         if event.user_id not in current_queue and event.user_id not in addition_queue:
                             current_queue.append(event.user_id)
-                            send_message(event.user_id, "Ты записан")
+                            send_message_key(event.user_id, "Ты записан", keyboards.in_queue().get_keyboard())
                             if not is_break:
                                 if current_queue[0] == event.user_id:
                                     send_message_key(current_queue[0],
-                                                     "Твое время пришло, как закончишь нажми готов",
+                                                     "Уже первый? скорость заслуживающая уважения иди отвечай,"
+                                                     " как закончишь нажми готово",
                                                      keyboards.current_player().get_keyboard())
                                 elif len(current_queue) > 1 and current_queue[1] == event.user_id:
-                                    send_message(current_queue[1], "Ты следующий, готовься")
+                                    send_message(current_queue[1], "Только зашел и сразу второй, готовься")
                         else:
                             send_message(event.user_id, "Прекращай, ты уже в очереди")
+                    elif text == "выписаться":
+                        if event.user_id in current_queue:
+                            if len(current_queue) > 2 and current_queue[1] == event.user_id:
+                                send_message(current_queue[2], "Тут перед тобой скипают, ты следующий теперь, готовься")
+                            current_queue.remove(event.user_id)
+                            send_message_key(event.user_id, "Ты удален из очереди.", keyboards.par().get_keyboard())
+                        else:
+                            send_message(event.user_id, "Ты не в очереди или записался за кем-то,"
+                                                        " в таком случае выписаться можно только после начала пары")
                     if is_break:
                         if text[:4] == "я за":
                             if event.user_id in current_queue:
