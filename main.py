@@ -40,11 +40,11 @@ addition_queue = {}
 loaded_queue = []
 is_break = True
 stage = False
+
+
 # 0 - wait
 # 1 - break
 # 2 - lesson
-delta = datetime.now() - start_day
-print(delta)
 
 
 def next():
@@ -236,7 +236,7 @@ def update_stage():
     global par
     global is_break
     delta = datetime.now() - start_day
-    day = delta.days % 14
+    day = delta.days % len(time_table)
     time = delta.seconds // 60
     print("time: " + str(time / 60))
     l_par = 0
@@ -289,10 +289,13 @@ def update_stage():
             print(str(day) + ", " + str(par) + ", " + str(l_par))
             if par > 0 and time_table[day][par - 1] != "0":
                 save_current_queue()
+                message_distribution_key("Очередь сохнанена, На момент сохранения в ней были:\n" + get_queue(),
+                                         keyboards.in_queue().get_keyboard())
             par = l_par
             if 1 < par < 7 and time_table[day][par - 1] == time_table[day][par - 2]:
-                message_distribution("Между первой и второй, перерывчик небольшой. А для кого-то опять " +
-                                     time_table[day][par - 2])
+                # message_distribution_key("Между первой и второй, перерывчик небольшой. А для кого-то опять " +
+                #                         time_table[day][par - 2] + " и никаких перерывов",
+                #                         keyboards.par().get_keyboard())
                 is_break = False
             elif 0 < par < 7:
                 if time_table[day][par - 1] != "0":
@@ -305,20 +308,32 @@ def update_stage():
                                              " твоего друга в очеред. Список с прошлой пары:\n" + get_loaded(),
                                              keyboards.par().get_keyboard())
                     for i in loaded_queue:
-                        send_message_key("Ты остался в списке с прошлой пары, если ты действительно не успел сдать,"
-                                         " запишись на эту тоже, твоя запись будет в приоритете, а если успел сдать"
-                                         " или сдал после окончания пары пожалуйста нажми кнопку \"Я Хорош\"",
+                        send_message_key(i, "Ты остался в списке с прошлой пары, если ты действительно не успел сдать,"
+                                            " запишись на эту тоже, твоя запись будет в приоритете, а если успел сдать"
+                                            " или сдал после окончания пары пожалуйста нажми кнопку \"Я Хорош\"",
                                          keyboards.loaded().get_keyboard())
+                is_break = l_is_break
+            else:
+                is_break = l_is_break
         elif is_break != l_is_break:
-            if time_table[day][par - 1] != "0":
+            if 1 < par < 7 and time_table[day][par - 1] == time_table[day][par - 2]:
+                is_break = False
+            else:
                 shuffle_queue()
+                is_break = l_is_break
+            par = l_par
+        else:
+            par = l_par
+            is_break = l_is_break
     elif par == 7 and is_break != l_is_break:
         print(str(day) + ", " + str(par - 1))
         if time_table[day][par - 2] != "0":
             save_current_queue()
-
-    par = l_par
-    is_break = l_is_break
+        par = l_par
+        is_break = l_is_break
+    else:
+        par = l_par
+        is_break = l_is_break
 
 
 load_time_table()
@@ -435,12 +450,13 @@ while True:
                             else:
                                 send_message(event.user_id, "Ты уже в очереди, хочешь за кем-то теперь?"
                                                             " А все надо было сначала думать потом делать.")
+                        elif text[:7] == "я хорош":
+                            send_message_key(event.user_id, "Ты действительно хорош!", keyboards.par().get_keyboard())
+                            loaded_queue.remove(event.user_id)
                     else:
                         if text == "готово":
                             if len(current_queue) > 0 and event.user_id == current_queue[0]:
                                 next()
-                        elif text[:7] == "я хорош":
-                            send_message_key(event.user_id, "Ты действительно хорош!", keyboards.par().get_keyboard())
                         elif text[:4] == "я за":
                             send_message(event.user_id, "Дружок, пара уже началась,"
                                                         " только в конец очереди, только хардкор")
