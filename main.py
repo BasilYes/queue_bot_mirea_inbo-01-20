@@ -50,7 +50,7 @@ stage = False
 def next():
     global current_queue
     send_message_key(current_queue[0],
-                     "Партия гордится тобой",
+                     "Молодец, возьми печеньку.",
                      keyboards.par().get_keyboard())
     current_queue.pop(0)
     if len(current_queue) > 1:
