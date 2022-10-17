@@ -172,7 +172,7 @@ def save_current_queue():
     global time_table
     global day
     global current_queue
-    file = open("Pars/" + time_table[day][par - 2] + '.txt', 'w', encoding="utf-8")
+    file = open("Pars/" + time_table[day][par - 1] + '.txt', 'w', encoding="utf-8")
     for i in current_queue:
         file.write(str(i) + "\n")
     file.close()
@@ -184,11 +184,11 @@ def load_queue():
     global loaded_queue
     global current_queue
     try:
-        file = open("Pars/" + time_table[day][par - 2] + '.txt', 'r', encoding="utf-8")
+        file = open("Pars/" + time_table[day][par - 1] + '.txt', 'r', encoding="utf-8")
     except:
-        file = open("Pars/" + time_table[day][par - 2] + '.txt', 'w', encoding="utf-8")
+        file = open("Pars/" + time_table[day][par - 1] + '.txt', 'w', encoding="utf-8")
         file.close()
-        file = open("Pars/" + time_table[day][par - 2] + '.txt', 'r', encoding="utf-8")
+        file = open("Pars/" + time_table[day][par - 1] + '.txt', 'r', encoding="utf-8")
     loaded_queue = [int(i[:-1]) for i in file.readlines()]
     file.close()
     current_queue = []
@@ -448,11 +448,18 @@ while True:
                                     send_message(event.user_id, "Не пытайся сломать бота,"
                                                                 " он может случайно забыть тебя записать.")
                             else:
-                                send_message(event.user_id, "Ты уже в очереди, хочешь за кем-то теперь?"
-                                                            " А все надо было сначала думать потом делать.")
+                                send_message(event.user_id, "Ты уже в очереди, хочешь за кем-то записаться?"
+                                                            " А все, надо было сначала думать потом делать.")
                         elif text[:7] == "я хорош":
-                            send_message_key(event.user_id, "Ты действительно хорош!", keyboards.par().get_keyboard())
-                            loaded_queue.remove(event.user_id)
+                            if event.user_id in loaded_queue:
+                                send_message_key(event.user_id,
+                                                 "Ты действительно хорош! Не забудь записаться в очередь!",
+                                                 keyboards.par().get_keyboard())
+                                loaded_queue.remove(event.user_id)
+                            else:
+                                send_message_key(event.user_id,
+                                                 "Боря, прекращай!",
+                                                 keyboards.par().get_keyboard())
                     else:
                         if text == "готово":
                             if len(current_queue) > 0 and event.user_id == current_queue[0]:
