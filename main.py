@@ -289,8 +289,7 @@ def update_stage():
             print(str(day) + ", " + str(par) + ", " + str(l_par))
             if par > 0 and time_table[day][par - 1] != "0":
                 save_current_queue()
-                message_distribution_key("Очередь сохнанена, На момент сохранения в ней были:\n" + get_queue(),
-                                         keyboards.in_queue().get_keyboard())
+                message_distribution("Очередь сохнанена, На момент сохранения в ней были:\n" + get_queue())
             par = l_par
             if 1 < par < 7 and time_table[day][par - 1] == time_table[day][par - 2]:
                 # message_distribution_key("Между первой и второй, перерывчик небольшой. А для кого-то опять " +
@@ -318,8 +317,10 @@ def update_stage():
         elif is_break != l_is_break:
             if 1 < par < 7 and time_table[day][par - 1] == time_table[day][par - 2]:
                 is_break = False
-            else:
+            elif time_table[day][par - 1] != "0":
                 shuffle_queue()
+                is_break = l_is_break
+            else:
                 is_break = l_is_break
             par = l_par
         else:
