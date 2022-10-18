@@ -450,9 +450,12 @@ while True:
                                                         " в таком случае выписаться можно только после начала пары")
                     # ---- Добавить смайлик ----
                     elif "изменить смайлик" in text:
-                        emoji = text.replace('изменить смайлик ', '')
-                        update_user(event.user_id, emoji)
-                        send_message(event.user_id, "Готово " + emoji)
+                        try:
+                            emoji = text.replace('изменить смайлик ', '')
+                            update_user(event.user_id, emoji)
+                            send_message(event.user_id, "Готово " + emoji)
+                        except Exception as msg:
+                            send_message(event.user_id, 'Произошла ошибка, перешлите Егору Бугрову ' + msg)
                     if is_break:
                         if text[:4] == "я за":
                             if event.user_id not in current_queue:
