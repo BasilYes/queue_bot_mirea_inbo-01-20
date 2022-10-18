@@ -1,10 +1,9 @@
 import os.path
 import random
 from datetime import datetime
-
+import time
 import vk_api
 from vk_api.utils import get_random_id
-
 import info
 import keyboards
 
@@ -168,6 +167,25 @@ def add_user(user_id, user_name):
     # else:
 
 
+# ---- Обновить смайлик ----
+def update_user(user_id, user_emoji):
+    global users
+    keys = users.keys()
+    str_id = str(user_id)
+    if user_id in keys:
+        users[user_id] = users[user_id][:users[user_id].rfind(' ')]
+        users[user_id] += ' ' + user_emoji
+        with open('users.txt', 'r', encoding="utf-8") as file:
+            lines = file.readlines()
+        for i in range(len(lines)):
+            if str_id in lines[i]:
+                lines[i] = lines[i][:lines[i].rfind(' ')]
+                lines[i] += ' ' + user_emoji + '\n'
+        with open('users.txt', 'w', encoding="utf-8") as file:
+            file.writelines(lines)
+    # else:
+
+
 def save_current_queue():
     global time_table
     global day
@@ -202,6 +220,9 @@ def shuffle_queue():
     for i in loaded_queue:
         if i in current_queue:
             new_queue.append(i)
+    # ---- Перемешать очередь ----
+    t = time.time()
+    random.seed(int(str(t - int(t))[2:]) % 100)
     random.shuffle(current_queue)
     for i in current_queue:
         if i not in new_queue:
@@ -427,6 +448,11 @@ while True:
                         else:
                             send_message(event.user_id, "Ты не в очереди или записался за кем-то,"
                                                         " в таком случае выписаться можно только после начала пары")
+                    # ---- Добавить смайлик ----
+                    elif "изменить смайлик" in text:
+                        emoji = text.replace('изменить смайлик ', '')
+                        update_user(event.user_id, emoji)
+                        send_message(event.user_id, "Готово " + emoji)
                     if is_break:
                         if text[:4] == "я за":
                             if event.user_id not in current_queue:
