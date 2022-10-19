@@ -172,17 +172,18 @@ def update_user(user_id, user_emoji):
     global users
     keys = users.keys()
     str_id = str(user_id)
-    if user_id in keys:
-        users[user_id] = users[user_id][:users[user_id].rfind(' ')]
-        users[user_id] += ' ' + user_emoji
-        with open('users.txt', 'r', encoding="utf-8") as file:
-            lines = file.readlines()
-        for i in range(len(lines)):
-            if str_id in lines[i]:
-                lines[i] = lines[i][:lines[i].rfind(' ')]
-                lines[i] += ' ' + user_emoji + '\n'
-        with open('users.txt', 'w', encoding="utf-8") as file:
-            file.writelines(lines)
+    if user_emoji != '' and user_emoji != 'изменить смайлик':
+        if user_id in keys:
+            users[user_id] = users[user_id][:users[user_id].rfind(' ')]
+            users[user_id] += ' ' + user_emoji
+            with open('users.txt', 'r', encoding="utf-8") as file:
+                lines = file.readlines()
+            for i in range(len(lines)):
+                if str_id in lines[i]:
+                    lines[i] = lines[i][:lines[i].rfind(' ')]
+                    lines[i] += ' ' + user_emoji + '\n'
+            with open('users.txt', 'w', encoding="utf-8") as file:
+                file.writelines(lines)
     # else:
 
 
@@ -413,6 +414,17 @@ while True:
                 elif event.user_id not in users:
                     send_message(event.user_id, "Сначала напиши свое ФИО после команды фио."
                                                 " Пример правильной команды: \"фио Реуков Василий\"")
+                # ---- Добавить смайлик ----
+                elif "изменить смайлик" in text:
+                    try:
+                        if text.replace(' ', '') != 'изменить смайлик':
+                            emoji = text.replace('изменить смайлик', '')
+                            emoji = emoji.replace(' ', '')
+                            emoji = emoji[:5]
+                            update_user(event.user_id, emoji)
+                            send_message(event.user_id, "Готово " + emoji)
+                    except Exception as msg:
+                        send_message(event.user_id, msg)
                 elif 0 < par <= 6 and time_table[day][par - 1] != "0":
                     # if not is_break:
                     print(text)
@@ -456,13 +468,16 @@ while True:
                                 #   if len(current_queue) > 0:
                                 #       send_message(event.user_id, get_queue())
                                 try:
-                                    if event.user_id in current_queue and event.user_id in addition_queue.values():  # Если хочет выписаться из главной очереди а замена есть
-                                        current_queue[current_queue.index(event.user_id)] = newMember(event.user_id)  # Ищем подсоса на замену
-                                        send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
-                                    elif event.user_id in current_queue and event.user_id not in addition_queue.values():  # Если хочет выписаться, а искать на замену некого
-                                        current_queue.remove(event.user_id)
-                                        send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
-                                    elif event.user_id in addition_queue:  # Если хочет выписаться из доп очереди
+                                    if event.user_id in current_queue:
+                                        if event.user_id in addition_queue.values():# Если хочет выписаться из главной очереди а замена есть
+                                            current_queue[current_queue.index(event.user_id)] = newMember(event.user_id)  # Ищем подсоса на замену
+                                            send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
+                                        else:
+                                            current_queue.remove(event.user_id)
+                                            send_message_key(event.user_id,
+                                                             "Не переживай, ты можешь записаться еще раз.",
+                                                             keyboards.par().get_keyboard())
+                                    elif event.user_id in addition_queue:
                                         del addition_queue[event.user_id]
                                         send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
                                     else:
@@ -473,14 +488,6 @@ while True:
                             #TODO: Эту надпись наверное нужно переделать теперь или вообще убрать можно
                             send_message(event.user_id, "Ты не в очереди или записался за кем-то,"
                                                         " в таком случае выписаться можно только после начала пары")
-                    # ---- Добавить смайлик ----
-                    elif "изменить смайлик" in text:
-                        try:
-                            emoji = text.replace('изменить смайлик ', '')
-                            update_user(event.user_id, emoji)
-                            send_message(event.user_id, "Готово " + emoji)
-                        except Exception as msg:
-                            send_message(event.user_id, msg)
                     if is_break:
                         if text[:4] == "я за":
                             if event.user_id not in current_queue:
