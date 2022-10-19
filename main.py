@@ -364,6 +364,16 @@ print(users)
 print(time_table)
 "116399612"
 
+# ---- Получение пользователя на место старого в очереди ----
+def newMember(oldUser):
+    valueFirst = list(addition_queue.keys())[list(addition_queue.values()).index(oldUser)] # Получаем первого подсоса
+    for key in addition_queue: # Проходимся по доп очереди
+        if addition_queue[key] == oldUser: # Ищем других подсосов
+            addition_queue[key] = valueFirst # Каждого подсоса связываем с первым подсосом
+    del addition_queue[valueFirst] # Удаляем главного подсоса
+    return valueFirst # и отправляем его назад чтобы передать в главную очередь
+
+
 while True:
     update_stage()
 
@@ -442,10 +452,25 @@ while True:
                                 current_queue.remove(event.user_id)
                                 send_message_key(event.user_id, "Ты удален из очереди.", keyboards.par().get_keyboard())
                             else:
-                                send_message_key(event.user_id,
-                                                 "Дружище, очередь еще не перемешана, подожди.",
-                                                 keyboards.par().get_keyboard())
+                                # if text == "очередь":
+                                #   if len(current_queue) > 0:
+                                #       send_message(event.user_id, get_queue())
+                                try:
+                                    if event.user_id in current_queue and event.user_id in addition_queue.values():  # Если хочет выписаться из главной очереди а замена есть
+                                        current_queue[current_queue.index(event.user_id)] = newMember(event.user_id)  # Ищем подсоса на замену
+                                        send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
+                                    elif event.user_id in current_queue and event.user_id not in addition_queue.values():  # Если хочет выписаться, а искать на замену некого
+                                        current_queue.remove(event.user_id)
+                                        send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
+                                    elif event.user_id in addition_queue:  # Если хочет выписаться из доп очереди
+                                        del addition_queue[event.user_id]
+                                        send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
+                                    else:
+                                        send_message(event.user_id, "Ты не в очереди")
+                                except Exception as msg:
+                                    send_message_key(event.user_id, msg, keyboards.par().get_keyboard())
                         else:
+                            #TODO: Эту надпись наверное нужно переделать теперь или вообще убрать можно
                             send_message(event.user_id, "Ты не в очереди или записался за кем-то,"
                                                         " в таком случае выписаться можно только после начала пары")
                     # ---- Добавить смайлик ----
@@ -455,7 +480,7 @@ while True:
                             update_user(event.user_id, emoji)
                             send_message(event.user_id, "Готово " + emoji)
                         except Exception as msg:
-                            send_message(event.user_id, 'Произошла ошибка, перешлите Егору Бугрову ' + msg)
+                            send_message(event.user_id, msg)
                     if is_break:
                         if text[:4] == "я за":
                             if event.user_id not in current_queue:
