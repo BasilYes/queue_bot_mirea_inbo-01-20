@@ -20,6 +20,7 @@ def in_queue():
 def in_queue_break():
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Очередь', color=VkKeyboardColor.POSITIVE)
+    keyboard.add_button('Выписаться', color=VkKeyboardColor.PRIMARY)
     return keyboard
 
 def loaded():
