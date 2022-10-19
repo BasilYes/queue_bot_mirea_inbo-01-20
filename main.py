@@ -172,17 +172,18 @@ def update_user(user_id, user_emoji):
     global users
     keys = users.keys()
     str_id = str(user_id)
-    if user_id in keys:
-        users[user_id] = users[user_id][:users[user_id].rfind(' ')]
-        users[user_id] += ' ' + user_emoji
-        with open('users.txt', 'r', encoding="utf-8") as file:
-            lines = file.readlines()
-        for i in range(len(lines)):
-            if str_id in lines[i]:
-                lines[i] = lines[i][:lines[i].rfind(' ')]
-                lines[i] += ' ' + user_emoji + '\n'
-        with open('users.txt', 'w', encoding="utf-8") as file:
-            file.writelines(lines)
+    if user_emoji != '' and user_emoji != 'изменить смайлик':
+        if user_id in keys:
+            users[user_id] = users[user_id][:users[user_id].rfind(' ')]
+            users[user_id] += ' ' + user_emoji
+            with open('users.txt', 'r', encoding="utf-8") as file:
+                lines = file.readlines()
+            for i in range(len(lines)):
+                if str_id in lines[i]:
+                    lines[i] = lines[i][:lines[i].rfind(' ')]
+                    lines[i] += ' ' + user_emoji + '\n'
+            with open('users.txt', 'w', encoding="utf-8") as file:
+                file.writelines(lines)
     # else:
 
 
@@ -416,9 +417,12 @@ while True:
                 # ---- Добавить смайлик ----
                 elif "изменить смайлик" in text:
                     try:
-                        emoji = text.replace('изменить смайлик ', '')
-                        update_user(event.user_id, emoji)
-                        send_message(event.user_id, "Готово " + emoji)
+                        if text.replace(' ', '') != 'изменить смайлик':
+                            emoji = text.replace('изменить смайлик', '')
+                            emoji = emoji.replace(' ', '')
+                            emoji = emoji[:5]
+                            update_user(event.user_id, emoji)
+                            send_message(event.user_id, "Готово " + emoji)
                     except Exception as msg:
                         send_message(event.user_id, msg)
                 elif 0 < par <= 6 and time_table[day][par - 1] != "0":
