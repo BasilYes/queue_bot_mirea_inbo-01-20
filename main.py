@@ -468,13 +468,16 @@ while True:
                                 #   if len(current_queue) > 0:
                                 #       send_message(event.user_id, get_queue())
                                 try:
-                                    if event.user_id in current_queue and event.user_id in addition_queue.values():  # Если хочет выписаться из главной очереди а замена есть
-                                        current_queue[current_queue.index(event.user_id)] = newMember(event.user_id)  # Ищем подсоса на замену
-                                        send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
-                                    elif event.user_id in current_queue and event.user_id not in addition_queue.values():  # Если хочет выписаться, а искать на замену некого
-                                        current_queue.remove(event.user_id)
-                                        send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
-                                    elif event.user_id in addition_queue:  # Если хочет выписаться из доп очереди
+                                    if event.user_id in current_queue:
+                                        if event.user_id in addition_queue.values():# Если хочет выписаться из главной очереди а замена есть
+                                            current_queue[current_queue.index(event.user_id)] = newMember(event.user_id)  # Ищем подсоса на замену
+                                            send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
+                                        else:
+                                            current_queue.remove(event.user_id)
+                                            send_message_key(event.user_id,
+                                                             "Не переживай, ты можешь записаться еще раз.",
+                                                             keyboards.par().get_keyboard())
+                                    elif event.user_id in addition_queue:
                                         del addition_queue[event.user_id]
                                         send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
                                     else:
