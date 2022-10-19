@@ -425,6 +425,10 @@ while True:
                             send_message(event.user_id, "Готово " + emoji)
                     except Exception as msg:
                         send_message(event.user_id, msg)
+                elif text[0] == "!":
+                    if event.user_id == 116399612 or event.user_id == 73985833:
+                        if text[:5] == "!print":
+                            message_distribution(event.text[:6])
                 elif 0 < par <= 6 and time_table[day][par - 1] != "0":
                     # if not is_break:
                     print(text)
