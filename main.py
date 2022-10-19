@@ -468,26 +468,22 @@ while True:
                                 #   if len(current_queue) > 0:
                                 #       send_message(event.user_id, get_queue())
                                 try:
-                                    if event.user_id in current_queue:
-                                        if event.user_id in addition_queue.values():# Если хочет выписаться из главной очереди а замена есть
-                                            current_queue[current_queue.index(event.user_id)] = newMember(event.user_id)  # Ищем подсоса на замену
-                                            send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
-                                        else:
-                                            current_queue.remove(event.user_id)
-                                            send_message_key(event.user_id,
-                                                             "Не переживай, ты можешь записаться еще раз.",
-                                                             keyboards.par().get_keyboard())
-                                    elif event.user_id in addition_queue:
-                                        del addition_queue[event.user_id]
+                                    if event.user_id in addition_queue.values():# Если хочет выписаться из главной очереди а замена есть
+                                        current_queue[current_queue.index(event.user_id)] = newMember(event.user_id)  # Ищем подсоса на замену
                                         send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
                                     else:
-                                        send_message(event.user_id, "Ты не в очереди")
+                                        current_queue.remove(event.user_id)
+                                        send_message_key(event.user_id,
+                                                         "Не переживай, ты можешь записаться еще раз.",
+                                                         keyboards.par().get_keyboard())
                                 except Exception as msg:
                                     send_message_key(event.user_id, msg, keyboards.par().get_keyboard())
+                        elif event.user_id in addition_queue:
+                            del addition_queue[event.user_id]
+                            send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.",
+                                             keyboards.par().get_keyboard())
                         else:
-                            #TODO: Эту надпись наверное нужно переделать теперь или вообще убрать можно
-                            send_message(event.user_id, "Ты не в очереди или записался за кем-то,"
-                                                        " в таком случае выписаться можно только после начала пары")
+                            send_message(event.user_id, "Ты не в очереди")
                     if is_break:
                         if text[:4] == "я за":
                             if event.user_id not in current_queue:
