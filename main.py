@@ -413,6 +413,14 @@ while True:
                 elif event.user_id not in users:
                     send_message(event.user_id, "Сначала напиши свое ФИО после команды фио."
                                                 " Пример правильной команды: \"фио Реуков Василий\"")
+                # ---- Добавить смайлик ----
+                elif "изменить смайлик" in text:
+                    try:
+                        emoji = text.replace('изменить смайлик ', '')
+                        update_user(event.user_id, emoji)
+                        send_message(event.user_id, "Готово " + emoji)
+                    except Exception as msg:
+                        send_message(event.user_id, msg)
                 elif 0 < par <= 6 and time_table[day][par - 1] != "0":
                     # if not is_break:
                     print(text)
@@ -473,14 +481,6 @@ while True:
                             #TODO: Эту надпись наверное нужно переделать теперь или вообще убрать можно
                             send_message(event.user_id, "Ты не в очереди или записался за кем-то,"
                                                         " в таком случае выписаться можно только после начала пары")
-                    # ---- Добавить смайлик ----
-                    elif "изменить смайлик" in text:
-                        try:
-                            emoji = text.replace('изменить смайлик ', '')
-                            update_user(event.user_id, emoji)
-                            send_message(event.user_id, "Готово " + emoji)
-                        except Exception as msg:
-                            send_message(event.user_id, msg)
                     if is_break:
                         if text[:4] == "я за":
                             if event.user_id not in current_queue:
