@@ -63,11 +63,14 @@ def next():
 def message_distribution(message):
     global Lsvk
     for i in users.keys():
-        Lsvk.messages.send(
-            user_id=i,
-            random_id=get_random_id(),
-            message=message
-        )
+        try:
+            Lsvk.messages.send(
+                user_id=i,
+                random_id=get_random_id(),
+                message=message
+            )
+        except:
+            print("Не стоит забывать, что Ильхам ЧЁРТ")
         # vk_session.method('messages.send', {'user_id': i, 'message': message, 'random_id': 0})
     print("Message distribution: " + message)
 
@@ -75,34 +78,43 @@ def message_distribution(message):
 def message_distribution_key(message, keyboard):
     global Lsvk
     for i in users.keys():
-        Lsvk.messages.send(
-            user_id=i,
-            random_id=get_random_id(),
-            keyboard=keyboard,
-            message=message
-        )
+        try:
+            Lsvk.messages.send(
+                user_id=i,
+                random_id=get_random_id(),
+                keyboard=keyboard,
+                message=message
+            )
+        except:
+            print("Не стоит забывать, что Ильхам ЧЁРТ")
         # vk_session.method('messages.send', {'user_id': i, 'message': message, 'random_id': 0})
     print("Message distribution: " + message)
 
 
 def send_message_key(user_id, message, keyboard):
     global Lsvk
-    Lsvk.messages.send(
-        user_id=user_id,
-        random_id=get_random_id(),
-        keyboard=keyboard,
-        message=message
-    )
+    try:
+        Lsvk.messages.send(
+            user_id=user_id,
+            random_id=get_random_id(),
+            keyboard=keyboard,
+            message=message
+        )
+    except:
+        print("Не стоит забывать, что Ильхам ЧЁРТ")
     # vk_session.method('messages.send', {'user_id': user_id, 'message': message, 'random_id': 0})
 
 
 def send_message(user_id, message):
     global Lsvk
-    Lsvk.messages.send(
-        user_id=user_id,
-        random_id=get_random_id(),
-        message=message
-    )
+    try:
+        Lsvk.messages.send(
+            user_id=user_id,
+            random_id=get_random_id(),
+            message=message
+        )
+    except:
+        print("Не стоит забывать, что Ильхам ЧЁРТ")
     # vk_session.method('messages.send', {'user_id': user_id, 'message': message, 'random_id': 0})
 
 
@@ -404,6 +416,7 @@ while True:
         if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
             if event.from_user:
                 text = event.text.lower()
+                print(event.text)
                 if text[0:3] == "фио":
                     if len(event.text[4:].split(" ")) < 2:
                         send_message(event.user_id, "Дружище, ты забыл написать фамилию И имя после команды фио."
