@@ -409,7 +409,7 @@ while True:
                         send_message(event.user_id, "Дружище, ты забыл написать фамилию И имя после команды фио."
                                                     " Пример правильной команды: \"фио Клоунов Егор\"")
                     else:
-                        add_user(event.user_id, event.text[4:])
+                        add_user(event.user_id, event.text[4:] + " ")
                         if 0 < par < 8 and time_table[day][par - 1] != "0":
                             send_message_key(event.user_id,
                                              event.text[4:] + " твое фио сохранено",
