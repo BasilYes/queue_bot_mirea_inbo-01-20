@@ -437,7 +437,7 @@ while True:
                     try:
                         if text.replace(' ', '') != 'изменить смайлик':
                             emoji = text.replace('изменить смайлик', '')
-                            emoji = emoji.replace(' ', '')
+                            emoji = emoji.replace(' ', '').replace('\n', '')
                             emoji = emoji[:5]
                             update_user(event.user_id, emoji)
                             send_message(event.user_id, "Готово " + emoji)
