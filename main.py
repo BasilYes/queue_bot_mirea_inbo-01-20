@@ -140,9 +140,8 @@ def load_time_table():
     global time_table
     time_table = []
     file = open('time_table.txt', 'r', encoding="utf-8")
-    for day in range(14):
-        table = []
-        time_table.append(file.readline()[:-1].split())
+    lines = file.readlines()
+    time_table = [i[:-1].split(" ") for i in lines]
     file.close()
 
 
@@ -302,11 +301,17 @@ def update_stage():
     elif time < 19 * 60 + 30:
         l_par = 6
         l_is_break = False
-    else:
+    elif time < 20 * 60:
         l_par = 7
         l_is_break = True
+    elif time < 21 * 60:
+        l_par = 7
+        l_is_break = False
+    else:
+        l_par = 8
+        l_is_break = True
 
-    if (l_par != 0 and par != 7) or not is_break:
+    if (l_par != 0 and par != 8) or not is_break:
         if par != l_par:
             print(str(day) + ", " + str(par) + ", " + str(l_par))
             if par > 0 and time_table[day][par - 1] != "0":
@@ -318,7 +323,7 @@ def update_stage():
                 #                         time_table[day][par - 2] + " и никаких перерывов",
                 #                         keyboards.par().get_keyboard())
                 is_break = False
-            elif 0 < par < 7:
+            elif 0 < par < 8:
                 if time_table[day][par - 1] != "0":
                     load_queue()
                     message_distribution_key("Новая очередь по предмету \"" +
@@ -337,18 +342,18 @@ def update_stage():
             else:
                 is_break = l_is_break
         elif is_break != l_is_break:
-            if 1 < par < 7 and time_table[day][par - 1] == time_table[day][par - 2]:
+            if 1 < par < 8 and time_table[day][par - 1] == time_table[day][par - 2]:
                 is_break = False
             elif time_table[day][par - 1] != "0":
-                shuffle_queue()
                 is_break = l_is_break
+                shuffle_queue()
             else:
                 is_break = l_is_break
             par = l_par
         else:
             par = l_par
             is_break = l_is_break
-    elif par == 7 and is_break != l_is_break:
+    elif par == 8 and is_break != l_is_break:
         print(str(day) + ", " + str(par - 1))
         if time_table[day][par - 2] != "0":
             save_current_queue()
@@ -405,7 +410,7 @@ while True:
                                                     " Пример правильной команды: \"фио Клоунов Егор\"")
                     else:
                         add_user(event.user_id, event.text[4:])
-                        if 0 < par < 6 and time_table[day][par - 1] != "0":
+                        if 0 < par < 8 and time_table[day][par - 1] != "0":
                             send_message_key(event.user_id,
                                              event.text[4:] + " твое фио сохранено",
                                              keyboards.par().get_keyboard())
@@ -415,7 +420,7 @@ while True:
                     send_message(event.user_id, "Сначала напиши свое ФИО после команды фио."
                                                 " Пример правильной команды: \"фио Реуков Василий\"")
                 # ---- Добавить смайлик ----
-                elif "изменить смайлик" in text:
+                elif text[:16] == "изменить смайлик":
                     try:
                         if text.replace(' ', '') != 'изменить смайлик':
                             emoji = text.replace('изменить смайлик', '')
@@ -429,7 +434,7 @@ while True:
                     if event.user_id == 116399612 or event.user_id == 73985833:
                         if text[:5] == "!print":
                             message_distribution(event.text[:6])
-                elif 0 < par <= 6 and time_table[day][par - 1] != "0":
+                elif 0 < par < 8 and time_table[day][par - 1] != "0":
                     # if not is_break:
                     print(text)
                     if text == "очередь":
