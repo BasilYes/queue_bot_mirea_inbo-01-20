@@ -382,14 +382,15 @@ print(users)
 print(time_table)
 "116399612"
 
+
 # ---- Получение пользователя на место старого в очереди ----
 def newMember(oldUser):
-    valueFirst = list(addition_queue.keys())[list(addition_queue.values()).index(oldUser)] # Получаем первого подсоса
-    for key in addition_queue: # Проходимся по доп очереди
-        if addition_queue[key] == oldUser: # Ищем других подсосов
-            addition_queue[key] = valueFirst # Каждого подсоса связываем с первым подсосом
-    del addition_queue[valueFirst] # Удаляем главного подсоса
-    return valueFirst # и отправляем его назад чтобы передать в главную очередь
+    valueFirst = list(addition_queue.keys())[list(addition_queue.values()).index(oldUser)]  # Получаем первого подсоса
+    for key in addition_queue:  # Проходимся по доп очереди
+        if addition_queue[key] == oldUser:  # Ищем других подсосов
+            addition_queue[key] = valueFirst  # Каждого подсоса связываем с первым подсосом
+    del addition_queue[valueFirst]  # Удаляем главного подсоса
+    return valueFirst  # и отправляем его назад чтобы передать в главную очередь
 
 
 while True:
@@ -436,7 +437,7 @@ while True:
                 elif text[:16] == "изменить смайлик":
                     try:
                         if text.replace(' ', '') != 'изменить смайлик':
-                            emoji = text.replace('изменить смайлик', '')
+                            emoji = event.text[17:]
                             emoji = emoji.replace(' ', '').replace('\n', '')
                             emoji = emoji[:5]
                             update_user(event.user_id, emoji)
@@ -447,6 +448,25 @@ while True:
                     if event.user_id == 116399612 or event.user_id == 73985833:
                         if text[:6] == "!print":
                             message_distribution(event.text[6:])
+                elif text == "help" or text == "помощь":
+                    send_message(event.user_id,
+                                 "Не смогли запомнить все команды? И куда вас это привело? Снова ко "
+                                 "мне.\n\"Универсальный компендиум знаний \"Магия очередей, редакция 1.0\" Далее "
+                                 "будут приведены заклинания для управления очередями и своими записями.\nКоль ты "
+                                 "хочешь записаться в очередь на подвиги ратные, иди и используй свиток заклинания "
+                                 "*Записаться*.\nЕсли желаешь украсить своё имя знаками отличия, путь твой приведет к "
+                                 "магии *Изменить смайлик*.\nСлучись так, что летописи про твои подвиги утеряны и "
+                                 "тебя заставляют выполнять геройства заново, но ты их уже совершил, "
+                                 "пиши *Я хорош*.\nДля подтверждения выполнения дел ратных и опасных, пиши *Готов*, "
+                                 "иначе не будет тебе награды за старания свои.\nКоль твой товарищ решил оторваться "
+                                 "вперед и записаться в очередь раньше тебя, но на задание вы хотите идти вместе, "
+                                 "командное заклинание *Я за \"Номер товарища\"* закрепит тебя за ним в "
+                                 "очереди.\nСлучись так, что ты оказался не готов к заданию, не задерживай "
+                                 "авантюристов после тебя, примени магию *Выписаться* и приходи более подготовленным "
+                                 "позднее.\nДля просмотра всех своих соперников по геройству, заклинание *Очередь* "
+                                 "тебе поможет.\nИ наконец, универсальное заклинание *Help* поможет тебе восполнить "
+                                 "пробелы в магии очередей.\nА теперь иди и совершай подвиги во имя себя и знаний. Да "
+                                 "пребудет с вами милость архимага Куджа. © Неофит Свят")
                 elif 0 < par < 8 and time_table[day][par - 1] != "0":
                     # if not is_break:
                     print(text)
@@ -490,9 +510,11 @@ while True:
                                 #   if len(current_queue) > 0:
                                 #       send_message(event.user_id, get_queue())
                                 try:
-                                    if event.user_id in addition_queue.values():# Если хочет выписаться из главной очереди а замена есть
-                                        current_queue[current_queue.index(event.user_id)] = newMember(event.user_id)  # Ищем подсоса на замену
-                                        send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.", keyboards.par().get_keyboard())
+                                    if event.user_id in addition_queue.values():  # Если хочет выписаться из главной очереди а замена есть
+                                        current_queue[current_queue.index(event.user_id)] = newMember(
+                                            event.user_id)  # Ищем подсоса на замену
+                                        send_message_key(event.user_id, "Не переживай, ты можешь записаться еще раз.",
+                                                         keyboards.par().get_keyboard())
                                     else:
                                         current_queue.remove(event.user_id)
                                         send_message_key(event.user_id,
