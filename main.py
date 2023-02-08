@@ -30,7 +30,7 @@ Lslongpoll = VkLongPoll(vk_session)
 Lsvk = vk_session.get_api()
 
 users = {}
-start_day = datetime.fromisoformat('2022-08-29')
+start_day = datetime.fromisoformat('2023-02-06')
 time_table = []
 day = 0
 par = 0
@@ -64,6 +64,7 @@ def message_distribution(message):
     global Lsvk
     for i in users.keys():
         try:
+            pass
             Lsvk.messages.send(
                 user_id=i,
                 random_id=get_random_id(),
@@ -79,6 +80,7 @@ def message_distribution_key(message, keyboard):
     global Lsvk
     for i in users.keys():
         try:
+            pass
             Lsvk.messages.send(
                 user_id=i,
                 random_id=get_random_id(),
@@ -94,6 +96,7 @@ def message_distribution_key(message, keyboard):
 def send_message_key(user_id, message, keyboard):
     global Lsvk
     try:
+        pass
         Lsvk.messages.send(
             user_id=user_id,
             random_id=get_random_id(),
@@ -108,6 +111,7 @@ def send_message_key(user_id, message, keyboard):
 def send_message(user_id, message):
     global Lsvk
     try:
+        pass
         Lsvk.messages.send(
             user_id=user_id,
             random_id=get_random_id(),
@@ -323,9 +327,11 @@ def update_stage():
         l_par = 8
         l_is_break = True
 
+    print("datetime.now(): " + str(datetime.now()))
+    print("delta.days: " + str(delta.days))
+
     if (l_par != 0 and par != 8) or not is_break:
         if par != l_par:
-            print(str(day) + ", " + str(par) + ", " + str(l_par))
             if par > 0 and time_table[day][par - 1] != "0":
                 save_current_queue()
                 message_distribution("Очередь сохнанена, На момент сохранения в ней были:\n" + get_queue())
