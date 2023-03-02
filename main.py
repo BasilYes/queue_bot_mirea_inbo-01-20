@@ -39,7 +39,7 @@ addition_queue = {}
 loaded_queue = []
 is_break = True
 stage = False
-
+admins = [116399612, 73985833, 152900351, 185274846, 348430773]
 
 # 0 - wait
 # 1 - break
@@ -460,11 +460,13 @@ while True:
                     except Exception as msg:
                         send_message(event.user_id, msg)
                 elif text[0] == "!":
-                    if event.user_id == 116399612 or event.user_id == 73985833:
+                    if event.user_id in admins:
                         if text[:6] == "!print":
                             message_distribution(event.text[6:])
-                        if text[:5] == "!kick":
+                        if text[:5] == "!kick" or text[:5] == "!кик":
                             kickMember(text[6:])
+                        if text[:4] == "!кик":
+                            kickMember(text[5:])
 
                 elif text == "help" or text == "помощь":
                     send_message(event.user_id,
