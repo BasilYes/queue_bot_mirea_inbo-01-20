@@ -393,8 +393,9 @@ print(time_table)
 def kickMember(user):
     global current_queue
     global users
-    if user in users[current_queue[0]]:
-        current_queue.pop(0)
+    if len(current_queue):
+        if user in users[current_queue[0]]:
+            current_queue.pop(0)
 
 
 
@@ -463,10 +464,8 @@ while True:
                     if event.user_id in admins:
                         if text[:6] == "!print":
                             message_distribution(event.text[6:])
-                        if text[:5] == "!kick" or text[:5] == "!кик":
-                            kickMember(text[6:])
                         if text[:4] == "!кик":
-                            kickMember(text[5:])
+                            kickMember(text[4:])
 
                 elif text == "help" or text == "помощь":
                     send_message(event.user_id,
