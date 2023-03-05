@@ -252,7 +252,8 @@ def shuffle_queue():
     message = "Очередь перемешана, текущая очередь:\n" + get_queue()
     keyboard = keyboards.in_queue().get_keyboard()
     global Lsvk
-    message_distribution(message)
+    if time_table[day][par - 1][0] != '_':
+        message_distribution(message)
     for i in current_queue:
         Lsvk.messages.send(
             user_id=i,
